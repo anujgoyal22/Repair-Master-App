@@ -1,0 +1,4 @@
+Item:crt tv|Issue:colour|Cost:500
+Item:|Issue:|Cost:
+Item:a|Issue:b|Cost:c
+Item:|Issue:|Cost:
