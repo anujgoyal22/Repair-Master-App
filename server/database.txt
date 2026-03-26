@@ -1,4 +1,4 @@
 Item:crt tv|Issue:colour|Cost:500
 Item:|Issue:|Cost:
-Item:a|Issue:b|Cost:c
+Item:a|Issue:b|Cost:77
 Item:|Issue:|Cost:

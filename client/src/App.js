@@ -9,12 +9,64 @@ function App() {
   const [records, setRecords] = useState([]);
   const [form, setForm] = useState({ item: '', issue: '', cost: '' });
   const [shop, setShop] = useState("");
+   // 1. Naya state variable (App.js ke andar)
+  const [editIndex, setEditIndex] = useState(null);
 
   // Page load hote hi Shop Name aur Data lao
   useEffect(() => {
     fetch('http://localhost:5000/config').then(r => r.json()).then(d => setShop(d.shopName));
     fetchData();
   }, []);
+  //==================================
+ const fetchData = async () => {
+    const res = await fetch('http://localhost:5000/read');
+    const data = await res.json();
+    if (data.message) {
+      const rows = data.message.split('\n').filter(r => r.includes('|'));
+      setRecords(rows);
+    }
+  };
+
+
+// 2. Edit Button dabane par kya hoga (Function)
+const handleEdit = (index, rowData) => {
+  // rowData kuch aisa hoga: "Item:LED TV|Issue:No Sound|Cost:800"
+  const parts = rowData.split('|');
+  const item = parts[0].split(':')[1];
+  const issue = parts[1].split(':')[1];
+  const cost = parts[2].split(':')[1];
+
+  // Form mein purana data bhar do
+  setForm({ item, issue, cost });
+  setEditIndex(index); // Yaad rakho kaun si row edit ho rahi hai
+};
+
+// EK HI handleSave rakhein (Naya wala)
+  const handleSave = async () => {
+    // Agar editIndex null nahi hai, toh UPDATE wala rasta, warna SAVE wala
+    const url = editIndex !== null 
+      ? 'http://localhost:5000/update-repair' 
+      : 'http://localhost:5000/save';
+
+    const method = editIndex !== null ? 'PUT' : 'POST';
+    const bodyData = editIndex !== null ? { ...form, index: editIndex } : form;
+
+    try {
+      const res = await fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bodyData)
+      });
+      const data = await res.json();
+      alert(data.message);
+
+      setForm({ item: '', issue: '', cost: '' }); 
+      setEditIndex(null); 
+      fetchData(); 
+    } catch (err) {
+      console.error("Save error:", err);
+    }
+  };
 //=====================================
 const handleDelete = async (index) => {
   // Confirm karein ki user delete karna chahta hai ya nahi
@@ -36,24 +88,9 @@ const handleDelete = async (index) => {
   }
 };
 //=======================================
-  const fetchData = async () => {
-    const res = await fetch('http://localhost:5000/read');
-    const data = await res.json();
-    if (data.message) {
-      const rows = data.message.split('\n').filter(r => r.includes('|'));
-      setRecords(rows);
-    }
-  };
+  
 
-  const handleSave = async () => {
-    await fetch('http://localhost:5000/save', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form)
-    });
-    setForm({ item: '', issue: '', cost: '' }); // Form clear karo
-    fetchData(); // Table refresh karo
-  };
+  
 
   return (
     <div style={{ textAlign: 'center', fontFamily: 'sans-serif' }}>
@@ -63,7 +100,14 @@ const handleDelete = async (index) => {
         <input placeholder="Item" value={form.item} onChange={e => setForm({...form, item: e.target.value})} />
         <input placeholder="Issue" value={form.issue} onChange={e => setForm({...form, issue: e.target.value})} />
         <input placeholder="Cost" value={form.cost} onChange={e => setForm({...form, cost: e.target.value})} />
-        <button onClick={handleSave}>Save Record</button>
+        {/* Button ka text badal jayega edit mode mein */}
+        <button onClick={handleSave}> 
+          {editIndex !== null ? "Update Record" : "Save Record"}
+        </button>
+        {/*Condition ==========*/}
+        {editIndex !== null && (
+          <button onClick={() => {setEditIndex(null); setForm({item:'', issue:'', cost:''})}}>Cancel</button>
+        )}
       </div>
 
       <table border="1" style={{ width: '80%', margin: 'auto' }}>
@@ -76,8 +120,11 @@ const handleDelete = async (index) => {
               {r.split('|').map((col, j) => 
               <td key={j}>{col.split(':')[1]}</td>)}
             <td>
+            <button onClick={() => handleEdit(i, r)} style={{ marginRight: '5px' }}>
+      Edit
+    </button>
     <button onClick={() => handleDelete(i)} style={{ color: 'red' }}>
-      Delete Permanently
+      Delete 
     </button>
   </td>
             </tr>

@@ -54,5 +54,36 @@ console.log(`inside delete `);
         });
     });
 });
+//================================
+// server/index.js mein add karein:
+
+app.put('/update-repair', (req, res) => {
+    // React se index aur naya data (item, issue, cost) aayega
+    const { index, item, issue, cost } = req.body;
+
+    // Nayi line ka format banaiye (Waisa hi jaisa hum save karte hain)
+    const updatedLine = `Item:${item}|Issue:${issue}|Cost:${cost}`;
+
+    fs.readFile('database.txt', 'utf8', (err, data) => {
+        if (err) return res.status(500).json({ message: "File read error" });
+
+        // 1. Poori file ko lines mein tod dein
+        let lines = data.split('\n').filter(line => line.trim() !== "");
+
+        // 2. Us specific index par purani line ko hata kar nayi line daal dein
+        // lines[index] ko direct badal dete hain
+        if (lines[index]) {
+            lines[index] = updatedLine;
+        }
+
+        // 3. Wapas string banayein aur file mein save karein
+        const updatedFileContent = lines.join('\n') + '\n';
+
+        fs.writeFile('database.txt', updatedFileContent, (err) => {
+            if (err) return res.status(500).json({ message: "File write error" });
+            res.json({ message: "Record updated successfully!" });
+        });
+    });
+});
 
 app.listen(PORT, () => console.log(`Server started on ${PORT}`));
