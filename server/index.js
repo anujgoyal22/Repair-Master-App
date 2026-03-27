@@ -66,19 +66,33 @@ app.put('/update-repair', (req, res) => {
 
     fs.readFile('database.txt', 'utf8', (err, data) => {
         if (err) return res.status(500).json({ message: "File read error" });
-
-        // 1. Poori file ko lines mein tod dein
+// 1. Line se pehle: File ka asli data (Jo ek lambi string hai)
+    console.log("--- STEP 1: data (File se jo aya) ---");
+    console.log(JSON.stringify(data)); // JSON.stringify se \n (new lines) saaf dikhengi
+    console.log("\n");
+    // Step 1: Sirf Split (Tukde karega)
+const allPieces = data.split('\n'); 
+console.log("allPieces ="+allPieces); 
+// Step 2: Filter (Khali lines ko nikaal dega)
+const cleanLines = allPieces.filter(line => line.trim() !== "");
+console.log("--- 2. Filter ke baad (Sirf kaam ka data bacha) ---");
+console.log(cleanLines);  
+    // 1. Poori file ko lines mein tod dein
         let lines = data.split('\n').filter(line => line.trim() !== "");
-
+    console.log("--- STEP 2: lines (Array banne ke baad) ---");
+    console.log(lines); 
+    console.log("Total Lines:", lines.length);
+    console.log("------------------------------------------");
         // 2. Us specific index par purani line ko hata kar nayi line daal dein
         // lines[index] ko direct badal dete hain
-        if (lines[index]) {
+        if (lines[index]) {console.log("lines ="+lines);
             lines[index] = updatedLine;
         }
+       // console.log("-----------"+lines);
 
         // 3. Wapas string banayein aur file mein save karein
         const updatedFileContent = lines.join('\n') + '\n';
-
+console.log ("updatedFileContent ="+ updatedFileContent);
         fs.writeFile('database.txt', updatedFileContent, (err) => {
             if (err) return res.status(500).json({ message: "File write error" });
             res.json({ message: "Record updated successfully!" });
