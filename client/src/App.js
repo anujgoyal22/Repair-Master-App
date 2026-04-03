@@ -11,7 +11,8 @@ function App() {
   const [shop, setShop] = useState("");
    // 1. Naya state variable (App.js ke andar)
   const [editIndex, setEditIndex] = useState(null);
-
+  //search Box=====================
+const [searchTerm, setSearchTerm] = useState(""); // Shuruat mein khali (empty)
   // Page load hote hi Shop Name aur Data lao
   useEffect(() => {
     fetch('http://localhost:5000/config').then(r => r.json()).then(d => setShop(d.shopName));
@@ -95,7 +96,17 @@ const handleDelete = async (index) => {
   return (
     <div style={{ textAlign: 'center', fontFamily: 'sans-serif' }}>
       <h1>{shop.replace(/_/g, ' ')}</h1>
-      
+      {/*==================Search box======================*/}
+      <div style={{ margin: '20px' }}>
+  <input 
+    type="text" 
+    placeholder="Search by Item or Issue..." 
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)} // Type karte hi state update hogi
+    style={{ padding: '10px', width: '50%', borderRadius: '5px', border: '1px solid #ccc' }}
+  />
+</div>
+      {/*===============================================================*/}
       <div style={{ background: '#f4f4f4', padding: '20px', marginBottom: '20px' }}>
         <input placeholder="Item" value={form.item} onChange={e => setForm({...form, item: e.target.value})} />
         <input placeholder="Issue" value={form.issue} onChange={e => setForm({...form, issue: e.target.value})} />
@@ -109,7 +120,7 @@ const handleDelete = async (index) => {
           <button onClick={() => {setEditIndex(null); setForm({item:'', issue:'', cost:''})}}>Cancel</button>
         )}
       </div>
-
+{/*===============================================================*/}
       <table border="1" style={{ width: '80%', margin: 'auto' }}>
         <thead>
           <tr><th>Item</th><th>Issue</th><th>Cost</th></tr>
@@ -118,19 +129,43 @@ const handleDelete = async (index) => {
           {records.map((r, i) => (
             <tr key={i}>
               {r.split('|').map((col, j) => 
-              <td key={j}>{col.split(':')[1]}</td>)}
+              <td key={j}>
+                {col.split(':')[1]} </td>)}
+            
             <td>
-            <button onClick={() => handleEdit(i, r)} style={{ marginRight: '5px' }}>
-      Edit
-    </button>
-    <button onClick={() => handleDelete(i)} style={{ color: 'red' }}>
-      Delete 
-    </button>
+            <button onClick={() => handleEdit(i, r)} style={{ marginRight: '5px' }}>Edit</button>
+            <button onClick={() => handleDelete(i)} style={{ color: 'red' }}>Delete </button>
   </td>
             </tr>
           ))}
         
         </tbody>
+      </table>
+      {/*==============Filtered table========================*/}
+      <table border="1" style={{ width: '80%', margin: 'auto' }}>
+      <h1> filtered table </h1>
+      <tbody>
+  {records
+    .filter((r) => {
+      // Agar search box khali hai, toh saare records dikhao
+      if (searchTerm === "") return r;
+      
+      // Agar kuch type kiya hai, toh check karo ki wo record mein hai ya nahi
+      // Hum sabko .toLowerCase() kar dete hain taaki 'TV' aur 'tv' dono match ho jayein
+      return r.toLowerCase().includes(searchTerm.toLowerCase());
+    })
+    .map((r, i) => (
+      <tr key={i} style={{ background: editIndex === i ? '#fff9c4' : 'transparent' }}>
+        {r.split('|').map((col, j) => (
+          <td key={j}>{col.split(':')[1]}</td>
+        ))}
+        <td>
+          <button onClick={() => handleEdit(i, r)}>Edit</button>
+          <button onClick={() => handleDelete(i)} style={{ color: 'red' }}>Delete</button>
+        </td>
+      </tr>
+    ))}
+</tbody>
       </table>
       <p>Raw Data: {JSON.stringify(records)}</p>
      {/*============================*/}
