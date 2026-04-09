@@ -1,5 +1,2 @@
 Item:crt tv|Issue:colour|Cost:500
-Item:|Issue:|Cost:
-Item:a|Issue:c|Cost:78
-Item:|Issue:|Cost:
-Item:x|Issue:y|Cost:00
+Item:x|Issue:y|Cost:09

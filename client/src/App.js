@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-
+import RepairForm from './components/RepairForm';
+import FilterTable from './components/FilterTable';
+import FullTable from './components/FullTable';
 import TestTable from './TestTable';
 //import MyList from './MyList'; // Naya component import kiya
 //import FruitList from './FruitList';
 //import Table from './Table';
-
+import Counter from './Counter';      // Naya import
+import Calculation from './Calculation'; // Naya import
 function App() {
   const [records, setRecords] = useState([]);
   const [form, setForm] = useState({ item: '', issue: '', cost: '' });
@@ -15,9 +18,12 @@ function App() {
 const [searchTerm, setSearchTerm] = useState(""); // Shuruat mein khali (empty)
   // Page load hote hi Shop Name aur Data lao
   useEffect(() => {
-    fetch('http://localhost:5000/config').then(r => r.json()).then(d => setShop(d.shopName));
+    fetch('http://localhost:5000/config')
+    .then(r => r.json())
+    .then(d => setShop(d.shopName));
     fetchData();
   }, []);
+  
   //==================================
  const fetchData = async () => {
     const res = await fetch('http://localhost:5000/read');
@@ -42,7 +48,7 @@ const handleEdit = (index, rowData) => {
   setEditIndex(index); // Yaad rakho kaun si row edit ho rahi hai
 };
 
-// EK HI handleSave rakhein (Naya wala)
+// 3.EK HI handleSave rakhein (Naya wala)
   const handleSave = async () => {
     // Agar editIndex null nahi hai, toh UPDATE wala rasta, warna SAVE wala
     const url = editIndex !== null 
@@ -105,42 +111,26 @@ const handleDelete = async (index) => {
     onChange={(e) => setSearchTerm(e.target.value)} // Type karte hi state update hogi
     style={{ padding: '10px', width: '50%', borderRadius: '5px', border: '1px solid #ccc' }}
   />
+  <RepairForm 
+        form={form} setForm={setForm} 
+        handleSave={handleSave} 
+        editIndex={editIndex} setEditIndex={setEditIndex} 
+      />
+<h3>Filtered table 0 </h3>
+      <FilterTable 
+        records={records} searchTerm={searchTerm} 
+        editIndex={editIndex} 
+        handleEdit={handleEdit} handleDelete={handleDelete} 
+      />
 </div>
       {/*===============================================================*/}
-      <div style={{ background: '#f4f4f4', padding: '20px', marginBottom: '20px' }}>
-        <input placeholder="Item" value={form.item} onChange={e => setForm({...form, item: e.target.value})} />
-        <input placeholder="Issue" value={form.issue} onChange={e => setForm({...form, issue: e.target.value})} />
-        <input placeholder="Cost" value={form.cost} onChange={e => setForm({...form, cost: e.target.value})} />
-        {/* Button ka text badal jayega edit mode mein */}
-        <button onClick={handleSave}> 
-          {editIndex !== null ? "Update Record" : "Save Record"}
-        </button>
-        {/*Condition ==========*/}
-        {editIndex !== null && (
-          <button onClick={() => {setEditIndex(null); setForm({item:'', issue:'', cost:''})}}>Cancel</button>
-        )}
-      </div>
+      <FullTable 
+  records={records} 
+  handleEdit={handleEdit} 
+  handleDelete={handleDelete} 
+/>
 {/*===============================================================*/}
-      <table border="1" style={{ width: '80%', margin: 'auto' }}>
-        <thead>
-          <tr><th>Item</th><th>Issue</th><th>Cost</th></tr>
-        </thead>
-        <tbody>
-          {records.map((r, i) => (
-            <tr key={i}>
-              {r.split('|').map((col, j) => 
-              <td key={j}>
-                {col.split(':')[1]} </td>)}
-            
-            <td>
-            <button onClick={() => handleEdit(i, r)} style={{ marginRight: '5px' }}>Edit</button>
-            <button onClick={() => handleDelete(i)} style={{ color: 'red' }}>Delete </button>
-  </td>
-            </tr>
-          ))}
-        
-        </tbody>
-      </table>
+
       {/*==============Filtered table========================*/}
       <table border="1" style={{ width: '80%', margin: 'auto' }}>
       <h1> filtered table </h1>
@@ -170,6 +160,12 @@ const handleDelete = async (index) => {
       <p>Raw Data: {JSON.stringify(records)}</p>
      {/*============================*/}
       <div>
+        <h3>W3Schools useEffect Examples:</h3>
+      
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
+        <Counter />
+        <Calculation />
+      </div>
       <TestTable />  {/* Bas ye line add karein */}
     </div>
     {/*============================*/}
