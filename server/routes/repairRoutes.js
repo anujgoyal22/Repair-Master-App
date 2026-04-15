@@ -21,18 +21,35 @@ router.post('/save', (req, res) => {
 // 3. DELETE Route: File se record hatane ke liye
 router.delete('/delete-repair', (req, res) => {
     const { index } = req.body;
-console.log(`inside delete `);
-    fs.readFile('database.txt', 'utf8', (err, data) => {
+console.log(`inside delete  `);
+    fs.readFile('database.txt',
+                        'utf8', 
+         (err, data) => {
         if (err) return res.status(500).json({ message: "File read error" });
-
+        let d=data ;
+        console.log('data = '+d);
+        let l=data.split('\n');
+        console.log("data.split('\n') = "+l);
+        let l0=l.filter(line => line.trim() !== "");
+        console.log('filter(line => line.trim() !== "") = '+l0);
+        /*================================*/
         let lines = data.split('\n').filter(line => line.trim() !== "");
-        
+        /*EX - ['const a = 1', ' ', '', 'console.log(a)']—this filter removes 
+        the middle two elements so they don't create "ghost" empty
+         lines in your final string.*/
+        console.log('lines = '+lines);
         // Us index waali line ko hata do
-        lines.splice(index, 1); 
+        let lines1=lines.splice(index, 1); //my modification
+        console.log('lines.splice(index, 1) = '+lines1);
 
         // Baaki bachi lines ko wapas file mein likho
         const updatedContent = lines.join('\n') + (lines.length > 0 ? '\n' : '');
-        
+        const uC =lines.join('\n');
+        console.log("lines.join('\n') ="+uC);
+        console.log("=================");
+        /*lines.length > 0 ? '\n' : '': 
+        This is a ternary operator that checks if the array has content.*/
+        console.log("lines.join('\n') + (lines.length > 0 ? '\n' : '') = "+updatedContent);
         fs.writeFile('database.txt', updatedContent, (err) => {
             if (err) return res.status(500).json({ message: "File write error" });
             res.json({ message: "Record deleted successfully!" });
@@ -46,7 +63,7 @@ router.put('/update-repair', (req, res) => {
 
     // Nayi line ka format banaiye (Waisa hi jaisa hum save karte hain)
     const updatedLine = `Item:${item}|Issue:${issue}|Cost:${cost}`;
-
+    console.log('updatedLine = '+updatedLine);
     fs.readFile('database.txt', 'utf8', (err, data) => {
         if (err) return res.status(500).json({ message: "File read error" });
 // 1. Line se pehle: File ka asli data (Jo ek lambi string hai)
