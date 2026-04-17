@@ -14,6 +14,14 @@ function App() {
   const [shop, setShop] = useState("");
    // 1. Naya state variable (App.js ke andar)
   const [editIndex, setEditIndex] = useState(null);
+  /*=========================================*/
+  const fetchData = async () => {
+const res = await fetch('http://localhost:5000/api/v2/mongo-read');
+  const data = await res.json();
+  // Ab data seedha array hai, split karne ki zaroorat nahi
+  setRecords(data); 
+};
+    /*=================================================*/
   //search Box=====================
 const [searchTerm, setSearchTerm] = useState(""); // Shuruat mein khali (empty)
   // Page load hote hi Shop Name aur Data lao
@@ -24,15 +32,7 @@ const [searchTerm, setSearchTerm] = useState(""); // Shuruat mein khali (empty)
     fetchData();
   }, []);
   
-  //==================================
- const fetchData = async () => {
-    const res = await fetch('http://localhost:5000/read');
-    const data = await res.json();
-    if (data.message) {
-      const rows = data.message.split('\n').filter(r => r.includes('|'));
-      setRecords(rows);
-    }
-  };
+  
 
 
 // 2. Edit Button dabane par kya hoga (Function)
@@ -168,7 +168,25 @@ const handleDelete = async (index) => {
       </div>
       <TestTable />  {/* Bas ye line add karein */}
     </div>
-    {/*============================*/}
+    {/*=============Database===============*/}
+    <table border="1" style={{ width: '80%', margin: 'auto' }}>
+      <h1>Database table</h1>
+      <tbody>
+        {records.map((r) => (
+  <tr key={r._id}>
+    <td>{r.item}</td>
+    <td>{r.issue}</td>
+    <td>{r.cost}</td>
+    <td>
+      <button onClick={() => handleEdit(r)}>Edit</button>
+      <button onClick={() => handleDelete(r._id)}>Delete</button>
+    </td>
+  </tr>
+))}
+      </tbody>
+    </table>
+    {/*==============Database==============*/}
+
     {/*<div className="App">
       <h1>Mera Main App</h1>
       <hr />  */}

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const fs = require('fs');
+
 const FILE_NAME = 'database.txt';
 // 1. Read Route
 router.get('/read', (req, res) => {
