@@ -1,207 +1,67 @@
 import React, { useState, useEffect } from 'react';
 import RepairForm from './components/RepairForm';
-import FilterTable from './components/FilterTable';
-import FullTable from './components/FullTable';
-import TestTable from './TestTable';
-//import MyList from './MyList'; // Naya component import kiya
-//import FruitList from './FruitList';
-//import Table from './Table';
-import Counter from './Counter';      // Naya import
-import Calculation from './Calculation'; // Naya import
+import LegacySystem from './components/LegacySystem';
+import MongoSystem from './components/MongoSystem';
+
 function App() {
-  const [records, setRecords] = useState([]);
   const [form, setForm] = useState({ item: '', issue: '', cost: '' });
-  const [shop, setShop] = useState("");
-   // 1. Naya state variable (App.js ke andar)
   const [editIndex, setEditIndex] = useState(null);
-  /*=========================================*/
-  const fetchData = async () => {
-const res = await fetch('http://localhost:5000/api/v2/mongo-read');
-  const data = await res.json();
-  // Ab data seedha array hai, split karne ki zaroorat nahi
-  setRecords(data); 
-};
-    /*=================================================*/
-  //search Box=====================
-const [searchTerm, setSearchTerm] = useState(""); // Shuruat mein khali (empty)
-  // Page load hote hi Shop Name aur Data lao
+  const [mongoEditId, setMongoEditId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [shop, setShop] = useState("");
+  const [refresh, setRefresh] = useState(0); // Tables ko refresh karne ke liye
+
   useEffect(() => {
     fetch('http://localhost:5000/config')
     .then(r => r.json())
     .then(d => setShop(d.shopName));
-    fetchData();
   }, []);
-  
-  
 
-
-// 2. Edit Button dabane par kya hoga (Function)
-const handleEdit = (index, rowData) => {
-  // rowData kuch aisa hoga: "Item:LED TV|Issue:No Sound|Cost:800"
-  const parts = rowData.split('|');
-  const item = parts[0].split(':')[1];
-  const issue = parts[1].split(':')[1];
-  const cost = parts[2].split(':')[1];
-
-  // Form mein purana data bhar do
-  setForm({ item, issue, cost });
-  setEditIndex(index); // Yaad rakho kaun si row edit ho rahi hai
-};
-
-// 3.EK HI handleSave rakhein (Naya wala)
   const handleSave = async () => {
-    // Agar editIndex null nahi hai, toh UPDATE wala rasta, warna SAVE wala
-    const url = editIndex !== null 
-      ? 'http://localhost:5000/update-repair' 
-      : 'http://localhost:5000/save';
-
-    const method = editIndex !== null ? 'PUT' : 'POST';
-    const bodyData = editIndex !== null ? { ...form, index: editIndex } : form;
-
-    try {
-      const res = await fetch(url, {
-        method: method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(bodyData)
-      });
-      const data = await res.json();
-      alert(data.message);
-
-      setForm({ item: '', issue: '', cost: '' }); 
-      setEditIndex(null); 
-      fetchData(); 
-    } catch (err) {
-      console.error("Save error:", err);
+    let url, method, bodyData;
+    if (mongoEditId) {
+      url = `http://localhost:5000/api/v2/mongo-update/${mongoEditId}`;
+      method = 'PUT'; bodyData = form;
+    } else if (editIndex !== null) {
+      url = 'http://localhost:5000/update-repair';
+      method = 'PUT'; bodyData = { ...form, index: editIndex };
+    } else {
+      url = 'http://localhost:5000/api/v2/mongo-save'; // Default Mongo save
+      method = 'POST'; bodyData = form;
     }
-  };
-//=====================================
-const handleDelete = async (index) => {
-  // Confirm karein ki user delete karna chahta hai ya nahi
-  if (!window.confirm("Are you sure you want to delete this?")) return;
 
-  try {console.log("inside try");
-    const res = await fetch('http://localhost:5000/delete-repair', {
-      method: 'DELETE',
+    const res = await fetch(url, {
+      method,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ index: index })
+      body: JSON.stringify(bodyData)
     });
-
     const data = await res.json();
-    alert(data.message); // "Record permanently deleted!" dikhayega
-    
-    fetchData(); // YE SABSE ZAROORI HAI: Table ko refresh karne ke liye
-  } catch (error) {
-    console.error("Delete error:", error);
-  }
-};
-//=======================================
-  
-
-  
+    alert(data.message);
+    setForm({ item: '', issue: '', cost: '' });
+    setEditIndex(null); setMongoEditId(null);
+    setRefresh(prev => prev + 1); // Dono systems ko reload karne ka ishara
+  };
 
   return (
-    <div style={{ textAlign: 'center', fontFamily: 'sans-serif' }}>
+    <div style={{ textAlign: 'center', padding: '20px' }}>
       <h1>{shop.replace(/_/g, ' ')}</h1>
-      {/*==================Search box======================*/}
-      <div style={{ margin: '20px' }}>
-  <input 
-    type="text" 
-    placeholder="Search by Item or Issue..." 
-    value={searchTerm}
-    onChange={(e) => setSearchTerm(e.target.value)} // Type karte hi state update hogi
-    style={{ padding: '10px', width: '50%', borderRadius: '5px', border: '1px solid #ccc' }}
-  />
-  <RepairForm 
-        form={form} setForm={setForm} 
-        handleSave={handleSave} 
-        editIndex={editIndex} setEditIndex={setEditIndex} 
+      <input 
+        placeholder="Search..." value={searchTerm} 
+        onChange={(e) => setSearchTerm(e.target.value)}
+        style={{ padding: '10px', width: '50%' }}
       />
-<h3>Filtered table 0 </h3>
-      <FilterTable 
-        records={records} searchTerm={searchTerm} 
-        editIndex={editIndex} 
-        handleEdit={handleEdit} handleDelete={handleDelete} 
-      />
-</div>
-      {/*===============================================================*/}
-      <FullTable 
-  records={records} 
-  handleEdit={handleEdit} 
-  handleDelete={handleDelete} 
-/>
-{/*===============================================================*/}
-
-      {/*==============Filtered table========================*/}
-      <table border="1" style={{ width: '80%', margin: 'auto' }}>
-      <h1> filtered table </h1>
-      <tbody>
-  {records
-    .filter((r) => {
-      // Agar search box khali hai, toh saare records dikhao
-      if (searchTerm === "") return r;
-      
-      // Agar kuch type kiya hai, toh check karo ki wo record mein hai ya nahi
-      // Hum sabko .toLowerCase() kar dete hain taaki 'TV' aur 'tv' dono match ho jayein
-      return r.toLowerCase().includes(searchTerm.toLowerCase());
-    })
-    .map((r, i) => (
-      <tr key={i} style={{ background: editIndex === i ? '#fff9c4' : 'transparent' }}>
-        {r.split('|').map((col, j) => (
-          <td key={j}>{col.split(':')[1]}</td>
-        ))}
-        <td>
-          <button onClick={() => handleEdit(i, r)}>Edit</button>
-          <button onClick={() => handleDelete(i)} style={{ color: 'red' }}>Delete</button>
-        </td>
-      </tr>
-    ))}
-</tbody>
-      </table>
-      <p>Raw Data: {JSON.stringify(records)}</p>
-     {/*============================*/}
-      <div>
-        <h3>W3Schools useEffect Examples:</h3>
-      
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
-        <Counter />
-        <Calculation />
-      </div>
-      <TestTable />  {/* Bas ye line add karein */}
+      <h3>RepairForm</h3>
+      <RepairForm form={form} 
+      setForm={setForm} 
+      handleSave={handleSave} 
+      editIndex={mongoEditId || editIndex} />
+     <h3>MongoSystem</h3>
+      <MongoSystem searchTerm={searchTerm} 
+      setForm={setForm} 
+      setMongoEditId={setMongoEditId} 
+      fetchDataTrigger={refresh} />
+      <LegacySystem searchTerm={searchTerm} setForm={setForm} setEditIndex={setEditIndex} fetchDataTrigger={refresh} />
     </div>
-    {/*=============Database===============*/}
-    <table border="1" style={{ width: '80%', margin: 'auto' }}>
-      <h1>Database table</h1>
-      <tbody>
-        {records.map((r) => (
-  <tr key={r._id}>
-    <td>{r.item}</td>
-    <td>{r.issue}</td>
-    <td>{r.cost}</td>
-    <td>
-      <button onClick={() => handleEdit(r)}>Edit</button>
-      <button onClick={() => handleDelete(r._id)}>Delete</button>
-    </td>
-  </tr>
-))}
-      </tbody>
-    </table>
-    {/*==============Database==============*/}
-
-    {/*<div className="App">
-      <h1>Mera Main App</h1>
-      <hr />  */}
-      
-      {/* Yahan aapka fruit list wala program chalega */}
-      {/*<MyList />
-      
-      <hr />  */}
-      {/* Aapka purana repair shop wala code yahan niche ho sakta hai */}
-   {/* </div> */}
-    {/*=========================================== */}
-    
-    </div>
-    
-   
   );
 }
 

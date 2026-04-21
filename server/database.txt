@@ -1,2 +1,3 @@
 Item:crt tv|Issue:colour|Cost:500
 Item:x|Issue:y|Cost:09
+Item:x|Issue:y|Cost:00
