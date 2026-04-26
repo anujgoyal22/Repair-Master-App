@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import RepairForm from './components/RepairForm';
+import UpadteRecord from './components/UpadteRecord';
 import LegacySystem from './components/LegacySystem';
 import MongoSystem from './components/MongoSystem';
 
@@ -16,16 +16,23 @@ function App() {
     .then(r => r.json())
     .then(d => setShop(d.shopName));
   }, []);
-
+/*================handleSave==================================*/
   const handleSave = async () => {
+    console.log("inside handleSave"); 
     let url, method, bodyData;
+    console.log("mongoEditId :"+mongoEditId);
+    console.log("editIndex :"+editIndex);
     if (mongoEditId) {
       url = `http://localhost:5000/api/v2/mongo-update/${mongoEditId}`;
-      method = 'PUT'; bodyData = form;
-    } else if (editIndex !== null) {
+      method = 'PUT'; 
+      bodyData = form;
+    }/*========Update Record========*/
+     else if (editIndex !== null) { 
       url = 'http://localhost:5000/update-repair';
-      method = 'PUT'; bodyData = { ...form, index: editIndex };
-    } else {
+      method = 'PUT'; 
+      bodyData = { ...form, index: editIndex };
+      }/*================Save============*/
+       else {
       url = 'http://localhost:5000/api/v2/mongo-save'; // Default Mongo save
       method = 'POST'; bodyData = form;
     }
@@ -35,6 +42,7 @@ function App() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(bodyData)
     });
+    
     const data = await res.json();
     alert(data.message);
     setForm({ item: '', issue: '', cost: '' });
@@ -50,17 +58,24 @@ function App() {
         onChange={(e) => setSearchTerm(e.target.value)}
         style={{ padding: '10px', width: '50%' }}
       />
-      <h3>RepairForm</h3>
-      <RepairForm form={form} 
+       {/*=========================*/}
+      <h3>UpadteRecord</h3>
+      <UpadteRecord form={form} 
       setForm={setForm} 
       handleSave={handleSave} 
       editIndex={mongoEditId || editIndex} />
+      
      <h3>MongoSystem</h3>
       <MongoSystem searchTerm={searchTerm} 
       setForm={setForm} 
       setMongoEditId={setMongoEditId} 
       fetchDataTrigger={refresh} />
-      <LegacySystem searchTerm={searchTerm} setForm={setForm} setEditIndex={setEditIndex} fetchDataTrigger={refresh} />
+      {/*=========================*/}
+      <LegacySystem 
+      searchTerm={searchTerm} 
+      setForm={setForm} 
+      setEditIndex={setEditIndex} 
+      fetchDataTrigger={refresh} />
     </div>
   );
 }
