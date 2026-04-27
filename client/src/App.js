@@ -46,7 +46,8 @@ function App() {
     const data = await res.json();
     alert(data.message);
     setForm({ item: '', issue: '', cost: '' });
-    setEditIndex(null); setMongoEditId(null);
+    setEditIndex(null); 
+    setMongoEditId(null);
     setRefresh(prev => prev + 1); // Dono systems ko reload karne ka ishara
   };
 
@@ -64,7 +65,7 @@ function App() {
       setForm={setForm} 
       handleSave={handleSave} 
       editIndex={mongoEditId || editIndex} />
-      
+      {/*=========================*/}
      <h3>MongoSystem</h3>
       <MongoSystem searchTerm={searchTerm} 
       setForm={setForm} 
