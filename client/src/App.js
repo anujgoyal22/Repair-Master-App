@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import UpadteRecord from './components/UpadteRecord';
+import UpdateRecord from './components/UpdateRecord';
 import LegacySystem from './components/LegacySystem';
 import MongoSystem from './components/MongoSystem';
 
@@ -60,11 +60,15 @@ function App() {
         style={{ padding: '10px', width: '50%' }}
       />
        {/*=========================*/}
-      <h3>UpadteRecord</h3>
-      <UpadteRecord form={form} 
+      <h3>UpdateRecord</h3>
+      <UpdateRecord 
+      form={form} 
       setForm={setForm} 
       handleSave={handleSave} 
-      editIndex={mongoEditId || editIndex} />
+      editIndex={mongoEditId || editIndex}
+      setEditIndex={setEditIndex}       // 👈 Yeh line jodiye (Legacy reset ke liye)
+      setMongoEditId={setMongoEditId}   // 👈 Yeh line bhi jodiye (Mongo reset ke liye)
+       />
       {/*=========================*/}
      <h3>MongoSystem</h3>
       <MongoSystem searchTerm={searchTerm} 
