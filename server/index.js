@@ -22,6 +22,7 @@ app.get('/config', (req, res) => {
 });
   // Saare repair routes ko use karein
 app.use('/', repairRoutes);
+//diverts traffic to mongoRepairRoutes
 app.use('/api/v2', mongoRepairRoutes); // Iska path alag rakhte hain taaki confusion na ho
 //const FILE_NAME = 'database.txt';
 // 6. Port Start

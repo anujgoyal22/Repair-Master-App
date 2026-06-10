@@ -18,21 +18,24 @@ function App() {
   }, []);
 /*================handleSave==================================*/
   const handleSave = async () => {
-    console.log("inside handleSave"); 
-    let url, method, bodyData;
-    console.log("mongoEditId :"+mongoEditId);
-    console.log("editIndex :"+editIndex);
+   let url, method, bodyData;
+    console.log("inside App.js/handleSave--------------"); 
+    console.log("mongoEditId = "+mongoEditId);
+    console.log("editIndex = "+editIndex);
     if (mongoEditId) {
+      console.log("inside_____Update MongoDbRecord_____________");
       url = `http://localhost:5000/api/v2/mongo-update/${mongoEditId}`;
       method = 'PUT'; 
       bodyData = form;
-    }/*========Update Record========*/
-     else if (editIndex !== null) { 
+    }/*========Update Legacy System Record========*/
+     else if (editIndex !== null) {
+      console.log("inside Update Legacy System record=====+====>"); 
       url = 'http://localhost:5000/update-repair';
       method = 'PUT'; 
       bodyData = { ...form, index: editIndex };
+      
       }/*================Save============*/
-       else {
+       else {console.log("inside---MongoDb Save------ bodyData = ",bodyData);
       url = 'http://localhost:5000/api/v2/mongo-save'; // Default Mongo save
       method = 'POST'; bodyData = form;
     }
@@ -49,7 +52,7 @@ function App() {
     setEditIndex(null); 
     setMongoEditId(null);
     setRefresh(prev => prev + 1); // Dono systems ko reload karne ka ishara
-  };
+  };//end const handleSave
 
   return (
     <div style={{ textAlign: 'center', padding: '20px' }}>

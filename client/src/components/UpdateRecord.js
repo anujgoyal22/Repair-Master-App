@@ -1,8 +1,10 @@
 import React from 'react';
 function UpdateRecord({ form, setForm, handleSave, editIndex, setEditIndex, setMongoEditId }) {
   // 👇 YAHAN PAR LIKHNA HAI (Return se theek pehle)
-    console.log("React ki asli state:", form);
+  console.log("inside UpdateRecord.js-----------");  
+  console.log("React ki asli state:", form);
     console.log("editIndex ="+editIndex);
+    console.log("===============================");
 return(
        <div style={{ background: '#f4f4f4', padding: '20px', marginBottom: '20px' }}>
         {/*================Item================*/}
@@ -26,9 +28,7 @@ return(
              setEditIndex(null);// Legacy ID saaf
              setMongoEditId(null);     // Mongo ID saaf
              setForm({item:'', issue:'', cost:''});//form khali
-              }}>
-                Cancel
-                </button>
+              }}>Cancel</button>
         )}
       </div>
 
